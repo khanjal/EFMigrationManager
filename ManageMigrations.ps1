@@ -3,9 +3,9 @@ $dbContext = "DbContext"
 
 function CreateMigration 
 {
-    $name = Read-Host 'Migration Name'
-    dnx ef migrations add $name --context $dbContext
-    Write-Host "Migration $name created."
+	$name = Read-Host 'Migration Name'
+	dnx ef migrations add $name --context $dbContext
+	Write-Host "Migration $name created."
 }
 
 function ApplyMigration($name) 
@@ -69,24 +69,24 @@ function Menu
 
 	Switch ($choice) {
 		"C" {
-				CreateMigration
-				Menu
-			}
+			CreateMigration
+			Menu
+		}
 		"A" {
-				ApplyMigration
-				Menu
-			}
+			ApplyMigration
+			Menu
+		}
 		"D" {
-				DeleteMigration
-				Menu
-			}
+			DeleteMigration
+			Menu
+		}
 		"L" {
-				ListMigrations > $null
-				Menu
-			}
+			ListMigrations > $null
+			Menu
+		}
 		"R" {
-				RevertMigration
-				Menu
+			RevertMigration
+			Menu
 		}
 		"Q" {Quit}
 		default {Menu}
