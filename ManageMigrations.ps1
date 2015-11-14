@@ -1,5 +1,5 @@
-#Set this to your dbContext name
-$dbContext = "DbContext"
+dnvm use 1.0.0-beta7
+dnu restore
 
 # Colors
 $infoColor = "Green"
@@ -7,24 +7,71 @@ $optionColor = "Yellow"
 $titleColor = "Cyan"
 $suggestionColor = "Magenta"
 
+function ToArray {
+	begin {
+		$output = @(); 
+	}
+	process {
+		$output += $_; 
+	}
+	end	{
+		return ,$output; 
+	}
+}
+
+function ListDbContexts 
+{
+	Write-Host "Getting dbcontexts..." -foregroundcolor $infoColor
+	$dbContexts = dnx ef dbcontext list | ToArray
+	
+	Write-Host "DbContexts" -foregroundcolor $titleColor
+	
+	for ($i=0; $i -lt $dbContexts.length; $i++) 
+		{
+			$dbContexts[$i] = $dbContexts[$i] -creplace '(?s)^.*\.', ''
+			Write-Host "[$i]" $dbContexts[$i] -foregroundcolor $optionColor
+		}
+
+	return $dbContexts
+}
+
+function PickDbContext 
+{
+	$dbContexts = ListDbContexts
+	$dbContextName = ''
+	
+	if (@($dbContexts).Count -gt 1) {
+		$number = Read-Host 'Pick dbContext'
+		
+		$dbContextName = $dbContexts[$number]
+	}
+	else {
+		$dbContextName = $dbContexts
+	}
+	
+	return $dbContextName
+}
+
+$dbContextName = PickDbContext
+
 function CreateMigration 
 {
 	$name = Read-Host 'Migration name'
-	dnx ef migrations add $name --context $dbContext
+	dnx ef migrations add $name '--context' $dbContextName
 	Write-Host "Migration $name created." -foregroundcolor $infoColor
 	Write-Host "Recommended actions: [A]pply or [D]elete" -foregroundcolor $suggestionColor
 }
 
 function ApplyMigration($name) 
 {
-	dnx ef database update $name -c $dbContext
-	if ([String]::IsNullOrEmpty($name))
+	dnx ef database update $name '--context' $dbContextName
+	if ([String]::IsNullOrEmpty($name)) 
 		{Write-Host "Migrations applied." -foregroundcolor $infoColor}
 }
 
 function DeleteMigration 
 {
-	dnx ef migrations remove --context $dbContext
+	dnx ef migrations remove '--context' $dbContextName
 	Write-Host "Migrations removed." -foregroundcolor $infoColor
 }
 
@@ -35,10 +82,12 @@ function RevertMigration
 	
 	$number = Read-Host 'Migration number'
 	
-	if ($number -lt $migrations.length)
-	{
-		if ($number -eq 0) {$migration = $number}
-		else {$migration = $migrations[$number]}
+	if ($number -lt $migrations.length)	{
+	
+		if ($number -eq 0) 
+			{$migration = $number}
+		else 
+			{$migration = $migrations[$number]}
 
 		ApplyMigration($migration)
 		
@@ -54,20 +103,29 @@ function RevertMigration
 function ListMigrations 
 {
 	Write-Host "Getting migrations..." -foregroundcolor $infoColor
-
-	$migrations = dnx ef migrations list --context $dbContext | ToArray
+	$migrations = dnx ef migrations list '--context' $dbContextName | ToArray
 	$migrations[0] = "All migrations"
 	
-	Write-Host $dbContext "migrations" -foregroundcolor $titleColor
-	for ($i=0; $i -lt $migrations.length; $i++) {
-		Write-Host "[$i]" $migrations[$i] -foregroundcolor $optionColor
-	}
+	if ([String]::IsNullOrEmpty($dbContextName)) 
+		{Write-Host "DbContext migrations" -foregroundcolor $titleColor}
+	else
+		{Write-Host $dbContextName "migrations" -foregroundcolor $titleColor}
+	
+	for ($i=0; $i -lt $migrations.length; $i++) 
+		{Write-Host "[$i]" $migrations[$i] -foregroundcolor $optionColor}
 
 	return $migrations
 }
 
+function ScriptMigrations() 
+{
+	dnx ef migrations script '--context' $dbContextName > MigrationScript.sql
+	Write-Host "MigrationScript.sql generated in project folder." -foregroundcolor $infoColor
+}
+
 function Quit 
 {
+	#TODO: Figure out a better quit?
 	#Write-Host "Press any key to continue ..."
 	#$x = $host.UI.RawUI.ReadKey("NoEcho,IncludeKeyDown")
 }
@@ -75,12 +133,14 @@ function Quit
 function Menu 
 {
 	Do {
+		Write-Host "------$dbContextName------" -foregroundcolor $titleColor
 		Write-Host "------Manage Migrations------" -foregroundcolor $titleColor
 		Write-Host "[C]reate Migration" -foregroundcolor $optionColor
-		Write-Host "[A]pply Migration" -foregroundcolor $optionColor
-		Write-Host "[D]elete Migrations" -foregroundcolor $optionColor
-		Write-Host "[L]ist Migrations" -foregroundcolor $optionColor
-		Write-Host "[R]evert Migration" -foregroundcolor $optionColor
+		Write-Host "[A]pply Migration(s)" -foregroundcolor $optionColor
+		Write-Host "[D]elete Migration(s)" -foregroundcolor $optionColor
+		Write-Host "[L]ist Migrations & DbContexts" -foregroundcolor $optionColor
+		Write-Host "[R]evert Migration(s)" -foregroundcolor $optionColor
+		Write-Host "[S]cript Migrations" -foregroundcolor $optionColor
 		Write-Host "[Q]uit" -foregroundcolor $optionColor
 		Write-Host "-----------------------------" -foregroundcolor $titleColor
 		$choice = read-host -prompt "Select option & press enter"
@@ -101,10 +161,19 @@ function Menu
 			}
 		"L" {
 				ListMigrations > $null
+				ListDbContexts > $null
 				Menu
 			}
 		"R" {
 				RevertMigration
+				Menu
+		}
+		"S" {
+				ScriptMigrations
+				Menu
+		}
+		"P" {
+				PickDbContext
 				Menu
 		}
 		"Q" {Quit}
@@ -112,22 +181,4 @@ function Menu
 	}
 }
 
-function ToArray
-{
-  begin
-  {
-	$output = @(); 
-  }
-  process
-  {
-	$output += $_; 
-  }
-  end
-  {
-	return ,$output; 
-  }
-}
-
-dnvm use 1.0.0-beta7
-dnu restore
 Menu
