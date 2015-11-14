@@ -13,5 +13,4 @@ This powershell script manages entity framework migrations without the need to m
  * __Install-Package EntityFramework.Commands -Pre__ - make migration commands available.
  * __Enable-Migrations__ - enables migrations.
 * Place powershell script in the project directory (.xproj) not the solution directory (.sln)
-* (Optional) Modify script to include appropriate __ContextKey__ if your project includes multiple DbContexts.
 * Run script through powershell or package manager console.
