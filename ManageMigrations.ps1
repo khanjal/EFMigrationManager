@@ -54,7 +54,7 @@ function RevertMigration
 function ListMigrations 
 {
 	Write-Host "Getting migrations..." -foregroundcolor $infoColor
-	$migrations = @()
+
 	$migrations = dnx ef migrations list --context $dbContext | ToArray
 	$migrations[0] = "All migrations"
 	
