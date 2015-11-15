@@ -1,5 +1,5 @@
-dnvm use 1.0.0-beta7
-dnu restore
+#Dvnm Version
+$dnvmVersion = "1.0.0-beta7"
 
 # Colors
 $infoColor = "Green"
@@ -7,6 +7,8 @@ $optionColor = "Yellow"
 $titleColor = "Cyan"
 $suggestionColor = "Magenta"
 
+
+# ToArray function to convert output into an array.
 function ToArray {
 	begin {
 		$output = @(); 
@@ -19,6 +21,26 @@ function ToArray {
 	}
 }
 
+function ListDnvmVersions{
+    dnvm list
+}
+
+function PickDnvmVersion{
+    $version = Read-Host "Type in a different version or hit enter to continue with $dnvmVersion"
+
+    if ($version -ne '')
+        {$dnvmVersion = $version}
+
+    Write-Host "Using dnvm version $dnvmVersion" -foregroundcolor $infoColor
+
+    return $dnvmVersion
+}
+
+ListDnvmVersions
+$dnvmVersion = PickDnvmVersion
+dnvm use $dnvmVersion
+dnu restore
+
 function ListDbContexts 
 {
 	Write-Host "Getting dbcontexts..." -foregroundcolor $infoColor
@@ -26,11 +48,10 @@ function ListDbContexts
 	
 	Write-Host "DbContexts" -foregroundcolor $titleColor
 	
-	for ($i=0; $i -lt $dbContexts.length; $i++) 
-		{
-			$dbContexts[$i] = $dbContexts[$i] -creplace '(?s)^.*\.', ''
-			Write-Host "[$i]" $dbContexts[$i] -foregroundcolor $optionColor
-		}
+	for ($i=0; $i -lt $dbContexts.length; $i++) {
+		$dbContexts[$i] = $dbContexts[$i] -creplace '(?s)^.*\.', ''
+		Write-Host "[$i]" $dbContexts[$i] -foregroundcolor $optionColor
+	}
 
 	return $dbContexts
 }
