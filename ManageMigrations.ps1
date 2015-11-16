@@ -21,11 +21,12 @@ function ToArray {
 	}
 }
 
-function ListDnvmVersions{
+function ListDnvmVersions {
+    Write-Host "Getting dnvm versions..." -foregroundcolor $infoColor
     dnvm list
 }
 
-function PickDnvmVersion{
+function PickDnvmVersion {
     $version = Read-Host "Type in a different version or hit enter to continue with $dnvmVersion"
 
     if ($version -ne '')
@@ -41,8 +42,7 @@ $dnvmVersion = PickDnvmVersion
 dnvm use $dnvmVersion
 dnu restore
 
-function ListDbContexts 
-{
+function ListDbContexts {
 	Write-Host "Getting dbcontexts..." -foregroundcolor $infoColor
 	$dbContexts = dnx ef dbcontext list | ToArray
 	
@@ -56,8 +56,7 @@ function ListDbContexts
 	return $dbContexts
 }
 
-function PickDbContext 
-{
+function PickDbContext {
 	$dbContexts = ListDbContexts
 	$dbContextName = ''
 	
@@ -75,29 +74,28 @@ function PickDbContext
 
 $dbContextName = PickDbContext
 
-function CreateMigration 
-{
-	$name = Read-Host 'Migration name'
-	dnx ef migrations add $name '--context' $dbContextName
-	Write-Host "Migration $name created." -foregroundcolor $infoColor
-	Write-Host "Recommended actions: [A]pply or [D]elete" -foregroundcolor $suggestionColor
+function CreateMigration {
+	$name = Read-Host 'Migration name or press enter to cancel'
+
+	if ($name -ne '') {
+		dnx ef migrations add $name '--context' $dbContextName
+		Write-Host "Migration $name created." -foregroundcolor $infoColor
+		Write-Host "Recommended actions: [A]pply or [D]elete" -foregroundcolor $suggestionColor
+	}
 }
 
-function ApplyMigration($name) 
-{
+function ApplyMigration($name) {
 	dnx ef database update $name '--context' $dbContextName
 	if ([String]::IsNullOrEmpty($name)) 
 		{Write-Host "Migrations applied." -foregroundcolor $infoColor}
 }
 
-function DeleteMigration 
-{
+function DeleteMigration {
 	dnx ef migrations remove '--context' $dbContextName
 	Write-Host "Migrations removed." -foregroundcolor $infoColor
 }
 
-function RevertMigration 
-{
+function RevertMigration {
 	$migrations = ListMigrations
 	Write-Host "[C]ancel" -foregroundcolor $optionColor
 	
@@ -121,8 +119,7 @@ function RevertMigration
 	}
 }
 
-function ListMigrations 
-{
+function ListMigrations {
 	Write-Host "Getting migrations..." -foregroundcolor $infoColor
 	$migrations = dnx ef migrations list '--context' $dbContextName | ToArray
 	$migrations[0] = "All migrations"
@@ -138,21 +135,18 @@ function ListMigrations
 	return $migrations
 }
 
-function ScriptMigrations() 
-{
+function ScriptMigrations() {
 	dnx ef migrations script '--context' $dbContextName > MigrationScript.sql
 	Write-Host "MigrationScript.sql generated in project folder." -foregroundcolor $infoColor
 }
 
-function Quit 
-{
+function Quit {
 	#TODO: Figure out a better quit?
 	#Write-Host "Press any key to continue ..."
 	#$x = $host.UI.RawUI.ReadKey("NoEcho,IncludeKeyDown")
 }
 
-function Menu 
-{
+function Menu {
 	Do {
 		Write-Host "------$dbContextName------" -foregroundcolor $titleColor
 		Write-Host "------Manage Migrations------" -foregroundcolor $titleColor
