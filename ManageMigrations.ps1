@@ -78,20 +78,20 @@ function CreateMigration {
 	$name = Read-Host 'Migration name or press enter to cancel'
 
 	if ($name -ne '') {
-		dnx ef migrations add $name '--context' $dbContextName
+		dnx ef migrations add $name -c $dbContextName
 		Write-Host "Migration $name created." -foregroundcolor $infoColor
 		Write-Host "Recommended actions: [A]pply or [D]elete" -foregroundcolor $suggestionColor
 	}
 }
 
 function ApplyMigration($name) {
-	dnx ef database update $name '--context' $dbContextName
+	dnx ef database update $name -c $dbContextName
 	if ([String]::IsNullOrEmpty($name)) 
 		{Write-Host "Migrations applied." -foregroundcolor $infoColor}
 }
 
 function DeleteMigration {
-	dnx ef migrations remove '--context' $dbContextName
+	dnx ef migrations remove -c $dbContextName
 	Write-Host "Migrations removed." -foregroundcolor $infoColor
 }
 
@@ -121,7 +121,7 @@ function RevertMigration {
 
 function ListMigrations {
 	Write-Host "Getting migrations..." -foregroundcolor $infoColor
-	$migrations = dnx ef migrations list '--context' $dbContextName | ToArray
+	$migrations = dnx ef migrations list -c $dbContextName | ToArray
 	$migrations[0] = "All migrations"
 	
 	if ([String]::IsNullOrEmpty($dbContextName)) 
@@ -136,7 +136,7 @@ function ListMigrations {
 }
 
 function ScriptMigrations() {
-	dnx ef migrations script '--context' $dbContextName > MigrationScript.sql
+	dnx ef migrations script -c $dbContextName -o MigrationScript.sql
 	Write-Host "MigrationScript.sql generated in project folder." -foregroundcolor $infoColor
 }
 
