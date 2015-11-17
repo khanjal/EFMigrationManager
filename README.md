@@ -1,4 +1,4 @@
-# EFMigrationManager
+# EF Migration Manager
 
 ## Description
 This powershell script manages entity framework migrations without the need to memorize all the commands.
