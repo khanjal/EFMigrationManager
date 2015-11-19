@@ -1,5 +1,5 @@
 #Dvnm Version
-$dnvmVersion = "1.0.0-beta7"
+$dnvmVersion = "1.0.0-beta8"
 
 # Colors
 $infoColor = "Green"
@@ -39,6 +39,7 @@ function PickDnvmVersion {
 
 ListDnvmVersions
 $dnvmVersion = PickDnvmVersion
+dnvm install $dnvmversion
 dnvm use $dnvmVersion
 dnu restore
 
