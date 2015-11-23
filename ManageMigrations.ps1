@@ -22,19 +22,19 @@ function ToArray {
 }
 
 function ListDnvmVersions {
-    Write-Host "Getting dnvm versions..." -foregroundcolor $infoColor
-    dnvm list
+	Write-Host "Getting dnvm versions..." -foregroundcolor $infoColor
+	dnvm list
 }
 
 function PickDnvmVersion {
-    $version = Read-Host "Type in a different version or hit enter to continue with $dnvmVersion"
+	$version = Read-Host "Type in a different version or hit enter to continue with $dnvmVersion"
 
-    if ($version -ne '')
-        {$dnvmVersion = $version}
+	if ($version -ne '')
+		{$dnvmVersion = $version}
 
-    Write-Host "Using dnvm version $dnvmVersion" -foregroundcolor $infoColor
+	Write-Host "Using dnvm version $dnvmVersion" -foregroundcolor $infoColor
 
-    return $dnvmVersion
+	return $dnvmVersion
 }
 
 ListDnvmVersions
